@@ -13,6 +13,7 @@ function App() {
 
   const [connected, setConnected] = useState(false)
   const [error, setError] = useState('')
+  const [highlightColor, setHighlightColor] = useState('magenta')
   const [modelName, setModelName] = useState<string>('')
   const [artMeshes, setArtMeshes] = useState<string[] | null>(null)
   const [tags, setTags] = useState<string[] | null>(null)
@@ -141,7 +142,13 @@ function App() {
 
   const pulseArtMeshTint = async (artMesh: string) => {
     try {
-      await plugin.apiClient.colorTint({ colorTint: { colorR: 127, colorG: 127, colorB: 127, colorA: 191 }, artMeshMatcher: { tintAll: false, nameExact: [artMesh] } })
+      const highlightColors: Record<string, { colorR: number, colorG: number, colorB: number, colorA: number }> = {
+        transparent: { colorR: 127, colorG: 127, colorB: 127, colorA: 191 },
+        cyan: { colorR: 0, colorG: 255, colorB: 255, colorA: 255 },
+        magenta: { colorR: 255, colorG: 0, colorB: 255, colorA: 255 },
+        yellow: { colorR: 255, colorG: 255, colorB: 0, colorA: 255 },
+      }
+      await plugin.apiClient.colorTint({ colorTint: highlightColors[highlightColor], artMeshMatcher: { tintAll: false, nameExact: [artMesh] } })
     } catch (e) {
       console.error(e)
       setError('' + e)
@@ -201,7 +208,12 @@ function App() {
         </>}
         {artMeshes && artMeshes.length ? <>
           <br />
-          <i>Note: Hovering over the art mesh names will highlight them in VTube Studio.</i>
+          <i>Note: Hovering over the art mesh names will highlight them in VTube Studio. Highlight color:&nbsp;<select value={highlightColor} onChange={e => setHighlightColor(e.target.value)}>
+            <option>transparent</option>
+            <option>cyan</option>
+            <option>magenta</option>
+            <option>yellow</option>
+          </select></i>
         </> : null}
         <h3>{modelName}</h3>
         <label>Filter:&nbsp;<input ref={filterRef} type="text" defaultValue={filter} onChange={e => changeFilter(e.target.value)} /></label>
@@ -230,7 +242,8 @@ function App() {
         </Fragment>) : <i>No model is currently loaded. Load a model to view the list of artmeshes and tags.</i>}
       </div> : <i title={error}>Not connected to VTube Studio. Ensure that you are running the latest version of VTube Studio on the same device as this webpage and that the port matches in the settings.</i>
       }
-    </div >
+      <i>If you are experiencing connection issues with VTube Studio, try refreshing the page.</i>
+    </div>
   )
 }
 
