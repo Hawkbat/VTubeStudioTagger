@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/VTubeStudioTagger/static/css/main.5d8f975a.chunk.css",
-    "main.js": "/VTubeStudioTagger/static/js/main.ba345460.chunk.js",
-    "main.js.map": "/VTubeStudioTagger/static/js/main.ba345460.chunk.js.map",
+    "main.js": "/VTubeStudioTagger/static/js/main.a8b461fe.chunk.js",
+    "main.js.map": "/VTubeStudioTagger/static/js/main.a8b461fe.chunk.js.map",
     "runtime-main.js": "/VTubeStudioTagger/static/js/runtime-main.3bc8bc1e.js",
     "runtime-main.js.map": "/VTubeStudioTagger/static/js/runtime-main.3bc8bc1e.js.map",
     "static/js/2.88e36238.chunk.js": "/VTubeStudioTagger/static/js/2.88e36238.chunk.js",
@@ -17,6 +17,6 @@
     "static/js/runtime-main.3bc8bc1e.js",
     "static/js/2.88e36238.chunk.js",
     "static/css/main.5d8f975a.chunk.css",
-    "static/js/main.ba345460.chunk.js"
+    "static/js/main.a8b461fe.chunk.js"
   ]
 }
