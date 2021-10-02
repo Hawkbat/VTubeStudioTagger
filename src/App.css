@@ -1,0 +1,16 @@
+div {
+  user-select: none;
+}
+
+label {
+  text-align: center;
+  font-weight: bold;
+}
+
+.tag {
+  display: inline-flex;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  padding: 0px 4px;
+  font-size: 14px;
+}
