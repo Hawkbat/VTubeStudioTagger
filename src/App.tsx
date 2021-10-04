@@ -143,11 +143,12 @@ function App() {
   const pulseArtMeshTint = async (artMesh: string) => {
     try {
       const highlightColors: Record<string, { colorR: number, colorG: number, colorB: number, colorA: number }> = {
-        transparent: { colorR: 127, colorG: 127, colorB: 127, colorA: 191 },
+        white: { colorR: 255, colorG: 255, colorB: 255, colorA: 255 },
         cyan: { colorR: 0, colorG: 255, colorB: 255, colorA: 255 },
         magenta: { colorR: 255, colorG: 0, colorB: 255, colorA: 255 },
         yellow: { colorR: 255, colorG: 255, colorB: 0, colorA: 255 },
       }
+      await plugin.apiClient.colorTint({ colorTint: { colorR: 255, colorG: 255, colorB: 255, colorA: 63 }, artMeshMatcher: { tintAll: true } })
       await plugin.apiClient.colorTint({ colorTint: highlightColors[highlightColor], artMeshMatcher: { tintAll: false, nameExact: [artMesh] } })
     } catch (e) {
       console.error(e)
@@ -157,7 +158,7 @@ function App() {
 
   const resetArtMeshTint = async (artMesh: string) => {
     try {
-      await plugin.apiClient.colorTint({ colorTint: { colorR: 255, colorG: 255, colorB: 255, colorA: 255 }, artMeshMatcher: { tintAll: false, nameExact: [artMesh] } })
+      await plugin.apiClient.colorTint({ colorTint: { colorR: 255, colorG: 255, colorB: 255, colorA: 255 }, artMeshMatcher: { tintAll: true } })
     } catch (e) {
       console.error(e)
       setError('' + e)
@@ -209,7 +210,7 @@ function App() {
         {artMeshes && artMeshes.length ? <>
           <br />
           <i>Note: Hovering over the art mesh names will highlight them in VTube Studio. Highlight color:&nbsp;<select value={highlightColor} onChange={e => setHighlightColor(e.target.value)}>
-            <option>transparent</option>
+            <option>white</option>
             <option>cyan</option>
             <option>magenta</option>
             <option>yellow</option>
