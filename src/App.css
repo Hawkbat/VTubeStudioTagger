@@ -14,3 +14,8 @@ label {
   padding: 0px 4px;
   font-size: 14px;
 }
+
+.selected {
+  background: black;
+  color: white;
+}

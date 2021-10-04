@@ -8,17 +8,18 @@ const TOKEN_KEY = 'vtstudio-tagger-token'
 const FILTER_KEY = 'vtstudio-tagger-filter'
 
 function App() {
-  const [vtsPort, setVtsPort] = useState(8001)
-  const [filter, setFilter] = useState(() => localStorage.getItem(FILTER_KEY) ?? '')
+  const [vtsPort, setVtsPort] = useState<number>(8001)
+  const [filter, setFilter] = useState<string>(() => localStorage.getItem(FILTER_KEY) ?? '')
 
-  const [connected, setConnected] = useState(false)
-  const [error, setError] = useState('')
-  const [highlightColor, setHighlightColor] = useState('magenta')
+  const [connected, setConnected] = useState<boolean>(false)
+  const [error, setError] = useState<string>('')
+  const [highlightColor, setHighlightColor] = useState<string>('magenta')
   const [modelName, setModelName] = useState<string>('')
   const [artMeshes, setArtMeshes] = useState<string[] | null>(null)
   const [tags, setTags] = useState<string[] | null>(null)
   const [originalArtMeshMap, setOriginalArtMeshMap] = useState<ArtMeshToTagsMap | null>(null)
   const [artMeshesToTags, setArtMeshesToTags] = useState<ArtMeshToTagsMap | null>(null)
+  const [selectedArtMesh, setSelectedArtMesh] = useState<string>('')
 
   const filterRef = useRef<HTMLInputElement>(null)
 
@@ -140,14 +141,16 @@ function App() {
     setOriginalArtMeshMap(JSON.parse(JSON.stringify(artMeshesToTags)))
   }
 
+  const highlightColors: Record<string, { colorR: number, colorG: number, colorB: number, colorA: number }> = {
+    white: { colorR: 255, colorG: 255, colorB: 255, colorA: 255 },
+    cyan: { colorR: 0, colorG: 255, colorB: 255, colorA: 255 },
+    magenta: { colorR: 255, colorG: 0, colorB: 255, colorA: 255 },
+    yellow: { colorR: 255, colorG: 255, colorB: 0, colorA: 255 },
+  }
+
   const pulseArtMeshTint = async (artMesh: string) => {
+    if (selectedArtMesh) return
     try {
-      const highlightColors: Record<string, { colorR: number, colorG: number, colorB: number, colorA: number }> = {
-        white: { colorR: 255, colorG: 255, colorB: 255, colorA: 255 },
-        cyan: { colorR: 0, colorG: 255, colorB: 255, colorA: 255 },
-        magenta: { colorR: 255, colorG: 0, colorB: 255, colorA: 255 },
-        yellow: { colorR: 255, colorG: 255, colorB: 0, colorA: 255 },
-      }
       await plugin.apiClient.colorTint({ colorTint: { colorR: 255, colorG: 255, colorB: 255, colorA: 63 }, artMeshMatcher: { tintAll: true } })
       await plugin.apiClient.colorTint({ colorTint: highlightColors[highlightColor], artMeshMatcher: { tintAll: false, nameExact: [artMesh] } })
     } catch (e) {
@@ -157,6 +160,7 @@ function App() {
   }
 
   const resetArtMeshTint = async (artMesh: string) => {
+    if (selectedArtMesh) return
     try {
       await plugin.apiClient.colorTint({ colorTint: { colorR: 255, colorG: 255, colorB: 255, colorA: 255 }, artMeshMatcher: { tintAll: true } })
     } catch (e) {
@@ -176,6 +180,15 @@ function App() {
     if (last) delete obj[artMesh]
     else obj[artMesh] = obj[artMesh].filter(t => t !== tag)
     setArtMeshesToTags(obj)
+  }
+
+  const selectArtMesh = async (e: React.MouseEvent<HTMLDivElement, MouseEvent>, artMesh: string) => {
+    e.stopPropagation()
+    setSelectedArtMesh(selectedArtMesh === artMesh ? '' : artMesh)
+    if (selectedArtMesh !== artMesh) {
+      await plugin.apiClient.colorTint({ colorTint: { colorR: 255, colorG: 255, colorB: 255, colorA: 63 }, artMeshMatcher: { tintAll: true } })
+      await plugin.apiClient.colorTint({ colorTint: highlightColors[highlightColor], artMeshMatcher: { tintAll: false, nameExact: [artMesh] } })
+    }
   }
 
   const filteredArtMeshes = filter ? artMeshes?.filter(p => p.toLowerCase().includes(filter.toLowerCase())) ?? [] : artMeshes ?? []
@@ -209,11 +222,8 @@ function App() {
         </>}
         {artMeshes && artMeshes.length ? <>
           <br />
-          <i>Note: Hovering over the art mesh names will highlight them in VTube Studio. Highlight color:&nbsp;<select value={highlightColor} onChange={e => setHighlightColor(e.target.value)}>
-            <option>white</option>
-            <option>cyan</option>
-            <option>magenta</option>
-            <option>yellow</option>
+          <i>Note: Hovering over the art mesh names will highlight them in VTube Studio, and clicking a name will keep it highlighted until it is clicked again. Highlight color:&nbsp;<select value={highlightColor} onChange={e => setHighlightColor(e.target.value)}>
+            {Object.keys(highlightColors).map(o => <option key={o}>{o}</option>)}
           </select></i>
         </> : null}
         <h3>{modelName}</h3>
@@ -224,7 +234,7 @@ function App() {
         <label>ArtMesh Name</label>
         <label>Tags</label>
         {sortedArtMeshes ? sortedArtMeshes.map((artMesh, i) => <Fragment key={artMesh + i}>
-          <div className="artmeshName" onMouseEnter={() => pulseArtMeshTint(artMesh)} onMouseLeave={() => resetArtMeshTint(artMesh)}>{artMesh}</div>
+          <div className={'artmeshName' + (selectedArtMesh === artMesh ? ' selected' : '')} onClick={e => selectArtMesh(e, artMesh)} onMouseEnter={() => pulseArtMeshTint(artMesh)} onMouseLeave={() => resetArtMeshTint(artMesh)}>{artMesh}{selectedArtMesh === artMesh ? '📌' : ''}</div>
           <div className="artmeshTags" onMouseEnter={() => pulseArtMeshTint(artMesh)} onMouseLeave={() => resetArtMeshTint(artMesh)}>
             {!needsUserDataFile ? <input type="text" placeholder="New tag..."
               onKeyDown={e => {
